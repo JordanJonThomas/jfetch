@@ -1,27 +1,5 @@
-#![allow(unused)]
-// user@hostname
-// -----------------
-// OS: 
-// Host: 
-// Kernal:
-// Uptime:
-// Packages:
-// Shell:
-// Resolution
-// DE:
-// WM:
-// Theme:
-// Icons
-// Terminal:
-// Terminal Font
-// CPU:
-// GPU:
-// Memory:
-
-
 use std::collections::VecDeque;
-
-use colored::{Color, ColoredString, Colorize, CustomColor};
+use colored::{ColoredString, Colorize, CustomColor};
 use sysinfo::{ProcessRefreshKind, RefreshKind, System};
 
 // Config
@@ -46,7 +24,7 @@ impl Config {
                 Module::Shell,
                 Module::Memory,
                 Module::CPU,
-                // Module::GPU,
+                // Module::GPU, // Disable by default (my laptop has no gpu ): )
             ],
             colors: vec![ // No less than 5 colors
                 CustomColor { r: 139, g: 118, b: 187 }, // Purple
@@ -60,7 +38,7 @@ impl Config {
 }
 
 // Modules
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, dead_code)]
 enum Module {
     Title { opts: TitleOpts },
     Line { len: usize },
@@ -68,11 +46,11 @@ enum Module {
     Kernel,
     Uptime { short: bool },
     Shell, 
-    //DE, // NOTE: These 3 are somewhat difficult to implement cross platform
+    //DE,
     //WM,
     //Terminal
     Memory,
-    CPU,      // TODO:
+    CPU,
     GPU,      // TODO:
     CPU_Usage,// TODO:
     Disk,     // TODO:
@@ -85,7 +63,6 @@ enum Module {
 }
 
 impl Module {
-    // TODO: Display subtitles alongside info
     pub fn display(self, cols: &Vec<CustomColor>) -> ColoredString {
         // Sys struct with processes
         let mut sys = sysinfo::System::new_with_specifics(
@@ -234,14 +211,12 @@ fn color_module(
 }
 
 fn main() {
-    // Find config file
-    //let conf_dir = dirs::config_local_dir();
-    // TODO: Handle less than 5 colors
-
     // Get config
+    // TODO: Read from config file
     let conf = Config::default();
 
-    // Basic ascii art
+    // Default ascii art
+    // TODO: Alternative default ascii arts
     let window = vec![
       vec!["      ".clear()," _.-;".red(),";-._ ".green(),],
       vec!["'-..-'".clear(),"|   |".red(),"|   |".green()],
@@ -259,8 +234,10 @@ fn main() {
             .join(""); // Join line
         art.push_back(line); // Add to vec
     }
+
+    // Get padding length
     let pad = strip_ansi_escapes::strip_str(art[0].clone()).len();
-    art.push_front(" ".to_string().repeat(pad));
+    art.push_front(" ".to_string().repeat(pad)); // Add padding to top
 
     // Test config colors
     //for col in &conf.colors {
@@ -269,9 +246,11 @@ fn main() {
 
     // Loop over modules
     for module in conf.modules {
-        // TODO: Print image on left
-        // Print line
+        // Get next line of ascii art
+        // HACK: This will cut off ascii art if art is longer than module listing
         let a = art.pop_front().unwrap_or(" ".to_string().repeat(pad));
+
+        // Print art and module
         println!("  {}  {}", a, module.display(&conf.colors));
     }
     println!();
