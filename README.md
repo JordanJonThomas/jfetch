@@ -20,7 +20,7 @@ Run executable directly.
 .\target\release\jfetch.exe
 ```
 #### Option B.
-Add to shell start up profile for automatic launch! (exmaple for powershell)
+Add to shell start up profile for automatic launch! (example for powershell)
 ```sh
 Add-Content -Path $PROFILE -Value '& "C:\path\to\jfetch\target\release\jfetch.exe"'
 ```
