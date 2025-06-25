@@ -75,9 +75,9 @@ impl Module {
         match self {
             Module::Title{ opts } => format!(
                 "{}{}{}",
-                opts.user.custom_color(cols[2]),
-                "@".custom_color(cols[3]),
-                opts.hostname.custom_color(cols[4]),
+                opts.user.bright_blue(),
+                "@".yellow(),
+                opts.hostname.bright_green(),
             ),
             // TODO: custom line char
             Module::Line { len } => format!(
@@ -205,8 +205,8 @@ fn color_module(
     cols: &Vec<CustomColor>) -> String {
     format!(
         "{}: {}",
-        subtitle.as_ref().custom_color(cols[1]),
-        info.as_ref().custom_color(cols[0])
+        subtitle.as_ref().bright_red(),
+        info.as_ref().bright_purple()
     )
 }
 
@@ -244,6 +244,9 @@ fn main() {
     //    println!("{}", "test color".custom_color(*col));
     //}
 
+    // Start printing!
+    println!();
+
     // Loop over modules
     for module in conf.modules {
         // Get next line of ascii art
@@ -253,5 +256,31 @@ fn main() {
         // Print art and module
         println!("  {}  {}", a, module.display(&conf.colors));
     }
+
+    // Color line
+    // TODO: Do this more betterer
+    println!();
+    print!("{}", " ".to_string().repeat(pad + 4));
+    print!("{}", "████".black());
+    print!("{}", "████".red());
+    print!("{}", "████".green());
+    print!("{}", "████".yellow());
+    print!("{}", "████".blue());
+    print!("{}", "████".purple());
+    print!("{}", "████".cyan());
+    print!("{}", "████".white());
+    println!();
+    print!("{}", " ".to_string().repeat(pad + 4));
+    print!("{}", "████".bright_black());
+    print!("{}", "████".bright_red());
+    print!("{}", "████".bright_green());
+    print!("{}", "████".bright_yellow());
+    print!("{}", "████".bright_blue());
+    print!("{}", "████".bright_purple());
+    print!("{}", "████".bright_cyan());
+    print!("{}", "████".bright_white());
+    println!();
+
+    // Newline at end
     println!();
 }
