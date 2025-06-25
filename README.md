@@ -1,7 +1,7 @@
 # JFetch (Demo)
 A simple fetching tool, inspired by [neofetch](https://github.com/dylanaraps/neofetch).
 
-![image](https://github.com/user-attachments/assets/d92bac6f-0589-4cb6-8ae5-68da749a5a27)
+![image](https://github.com/user-attachments/assets/910adf6b-df22-4ec3-9c38-3fe1d6e49ece)
 
 - Displays basic system information (OS, Kernel, Uptime, etc)
 - Displays ascii art
