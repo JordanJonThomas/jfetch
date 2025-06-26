@@ -1,11 +1,10 @@
 use std::collections::VecDeque;
-use colored::{ColoredString, Colorize, CustomColor};
+use colored::{ColoredString, Colorize};
 use sysinfo::{ProcessRefreshKind, RefreshKind, System};
 
 // Config
 struct Config { 
     modules: Vec<Module>,
-    colors: Vec<CustomColor>,
 }
 impl Config {
     // Default config
@@ -24,15 +23,16 @@ impl Config {
                 Module::Shell,
                 Module::Memory,
                 Module::CPU,
-                // Module::GPU, // Disable by default (my laptop has no gpu ): )
+                Module::GPU,
             ],
-            colors: vec![ // No less than 5 colors
-                CustomColor { r: 139, g: 118, b: 187 }, // Purple
-                CustomColor { r: 247, g: 118, b: 142 }, // Red
-                CustomColor { r: 125, g: 207, b: 255 }, // Blue
-                CustomColor { r: 223, g: 167, b: 72 },  // Yellow
-                CustomColor { r: 158, g: 206, b: 106 }, // Green
-            ]
+            // NOTE: This was deprecated, use system colors
+            //colors: vec![ // No less than 5 colors
+            //    CustomColor { r: 139, g: 118, b: 187 }, // Purple
+            //    CustomColor { r: 247, g: 118, b: 142 }, // Red
+            //    CustomColor { r: 125, g: 207, b: 255 }, // Blue
+            //    CustomColor { r: 223, g: 167, b: 72 },  // Yellow
+            //    CustomColor { r: 158, g: 206, b: 106 }, // Green
+            //]
         }
     }
 }
@@ -51,7 +51,7 @@ enum Module {
     //Terminal
     Memory,
     CPU,
-    GPU,      // TODO:
+    GPU,
     CPU_Usage,// TODO:
     Disk,     // TODO:
     Battery,  // TODO:
@@ -63,7 +63,7 @@ enum Module {
 }
 
 impl Module {
-    pub fn display(self, cols: &Vec<CustomColor>) -> ColoredString {
+    pub fn display(self) -> ColoredString {
         // Sys struct with processes
         let mut sys = sysinfo::System::new_with_specifics(
             RefreshKind::nothing()
@@ -85,33 +85,26 @@ impl Module {
             ),
             Module::OS => color_module(
                 "OS", whoami::distro(),
-                cols
             ),
             Module::Kernel => color_module(
                 "Kernel", System::kernel_long_version(),
-                cols
             ),
             Module::Uptime { short } => color_module(
                 "Uptime", format_time(System::uptime(), short), 
-                cols
             ),
             Module::Shell => color_module(
                 "Shell",get_current_shell(&mut sys),
-                cols
             ),
             Module::Memory => color_module(
                 "Memory", get_memory(&mut sys),
-                cols
             ),
             Module::CPU => color_module(
                 "CPU",
                 sys.cpus()[0].brand(),
-                cols
             ),
             Module::GPU => color_module(
                 "GPU",
                 get_gpu_info(),
-                cols
             ),
             _ => "Not implemented".to_string()
         }.into()
@@ -186,23 +179,27 @@ fn get_memory(sys: &mut System) -> String {
     )
 }
 
+// TODO: Check for OS, if on linux call seperate function
 fn get_gpu_info() -> String {
-    // Get graphics info
-    let mut machine = machine_info::Machine::new();
-    let graphics = machine.system_info().graphics;
+    // Get graphics device
+    let mut graphics = winsafe::EnumDisplayDevices(None, None);
+    let graphics = graphics.next();
 
-    if graphics.is_empty() {
+    // Not found
+    if graphics.is_none() || graphics.unwrap().is_err() { 
         return "Unknown".to_string();
     }
+    let graphics = graphics.unwrap().unwrap();
 
-    graphics[0].name.to_string()
+    // Return graphics string
+    graphics.DeviceString()
 }
 
 // Creates a string with the default module style and colors
 fn color_module(
     subtitle: impl AsRef<str>,
     info: impl AsRef<str>, 
-    cols: &Vec<CustomColor>) -> String {
+) -> String {
     format!(
         "{}: {}",
         subtitle.as_ref().bright_red(),
@@ -239,11 +236,6 @@ fn main() {
     let pad = strip_ansi_escapes::strip_str(art[0].clone()).len();
     art.push_front(" ".to_string().repeat(pad)); // Add padding to top
 
-    // Test config colors
-    //for col in &conf.colors {
-    //    println!("{}", "test color".custom_color(*col));
-    //}
-
     // Start printing!
     println!();
 
@@ -254,8 +246,9 @@ fn main() {
         let a = art.pop_front().unwrap_or(" ".to_string().repeat(pad));
 
         // Print art and module
-        println!("  {}  {}", a, module.display(&conf.colors));
+        println!("  {}  {}", a, module.display());
     }
+    // TODO: continue printing art if vec not exhausted
 
     // Color line
     // TODO: Do this more betterer

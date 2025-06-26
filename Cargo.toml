@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 colored = "3.0.0"
-machine-info = "1.0.9"
 strip-ansi-escapes = "0.2.1"
 sysinfo = "0.35.1"
 whoami = "1.6.0"
+winsafe = { version = "0.0.24", features = ["user"] }
